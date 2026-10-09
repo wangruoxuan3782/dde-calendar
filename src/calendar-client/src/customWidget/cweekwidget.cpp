@@ -9,6 +9,8 @@
 #include <QLocale>
 #include <QPainter>
 #include <QDate>
+#include <DPaletteHelper>
+#include <DGuiApplicationHelper>
 
 CWeekWidget::CWeekWidget(QWidget *parent) : QPushButton(parent)
   , m_firstDay(CalendarManager::getInstance()->getFirstDayOfWeek())
@@ -36,6 +38,12 @@ void CWeekWidget::setAutoFontSizeByWindow(bool is)
 {
     // qCDebug(ClientLogger) << "CWeekWidget::setAutoFontSizeByWindow is:" << is;
     m_autoFontSizeByWindow = is;
+}
+
+void CWeekWidget::setTextColor(const QColor &color)
+{
+    m_textColor = color;
+    update();
 }
 
 void CWeekWidget::paintEvent(QPaintEvent *event)
@@ -84,6 +92,16 @@ void CWeekWidget::paintEvent(QPaintEvent *event)
         QString weekDayName = locale.dayName(i, QLocale::NarrowFormat);
         weekStr << weekDayName;
     }
+
+    QColor weekColor;
+    if (m_textColor.isValid()) {
+        weekColor = m_textColor;
+    } else {
+        weekColor = palette().color(QPalette::WindowText);
+        bool isDark = Dtk::Gui::DGuiApplicationHelper::instance()->themeType() == Dtk::Gui::DGuiApplicationHelper::DarkType;
+        weekColor.setAlphaF(isDark ? 0.5 : 0.5);
+    }
+    painter.setPen(weekColor);
 
     //绘制周一到周日
     for (int i = Qt::Monday; i <= Qt::Sunday; ++i) {
